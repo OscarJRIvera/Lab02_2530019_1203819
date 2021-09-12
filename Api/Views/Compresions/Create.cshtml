@@ -1,0 +1,58 @@
+﻿@model Api.Models.Compresion
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>Compresion</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="NombreOriginal" class="control-label"></label>
+                <input asp-for="NombreOriginal" class="form-control" />
+                <span asp-validation-for="NombreOriginal" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="NombreComprimido" class="control-label"></label>
+                <input asp-for="NombreComprimido" class="form-control" />
+                <span asp-validation-for="NombreComprimido" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="RutaComprimido" class="control-label"></label>
+                <input asp-for="RutaComprimido" class="form-control" />
+                <span asp-validation-for="RutaComprimido" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="RazonDeCompresion" class="control-label"></label>
+                <input asp-for="RazonDeCompresion" class="form-control" />
+                <span asp-validation-for="RazonDeCompresion" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="FactorDeCompresion" class="control-label"></label>
+                <input asp-for="FactorDeCompresion" class="form-control" />
+                <span asp-validation-for="FactorDeCompresion" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="PorcentajeDeReduccion" class="control-label"></label>
+                <input asp-for="PorcentajeDeReduccion" class="form-control" />
+                <span asp-validation-for="PorcentajeDeReduccion" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

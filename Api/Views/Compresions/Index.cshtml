@@ -1,0 +1,65 @@
+﻿@model IEnumerable<Api.Models.Compresion>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.NombreOriginal)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.NombreComprimido)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.RutaComprimido)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.RazonDeCompresion)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.FactorDeCompresion)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PorcentajeDeReduccion)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.NombreOriginal)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.NombreComprimido)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.RutaComprimido)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.RazonDeCompresion)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.FactorDeCompresion)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PorcentajeDeReduccion)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.id">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.id">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.id">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
