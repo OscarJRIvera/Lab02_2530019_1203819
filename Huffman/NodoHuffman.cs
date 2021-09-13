@@ -5,7 +5,7 @@ using System.Text;
 namespace Huffman
 {
     public class NodoHuffman
-    { 
+    {
         public NodoHuffman Contenedor { get; set; }
         public NodoHuffman Izquierda { get; set; }
         public NodoHuffman Derecha { get; set; }
