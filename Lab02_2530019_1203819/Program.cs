@@ -25,10 +25,24 @@ namespace Lab02_2530019_1203819
             prueba.AgregarHeap(l);
             prueba.AgregarHuffman();
             prueba.Prefijos();
+            var d = prueba.CargarDiccionario();
+            foreach (var t in d)
+            {
+                Console.WriteLine(t.Key + " - " + t.Value);
+            }
 
+            var f = prueba.CargarTabla();
+            foreach (var t in f)
+            {
+                Console.WriteLine(t.Key + " - " + t.Value);
+            }
+            var x = prueba.EscribirTablaAscii(f);
+            Console.WriteLine(x);
 
-
+            var z = prueba.EscribirCompresión(d, vari);
+            Console.WriteLine(z);
         }
+
 
     }
 }
