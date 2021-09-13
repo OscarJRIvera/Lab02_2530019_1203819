@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Huffman;
 using System.Collections.Generic;
 
@@ -14,7 +14,7 @@ namespace Lab02_2530019_1203819
             //string vari = "Cuando cuentes cuentos, cuenta cuántos cuentos cuentas; porque si " +
             //    "no cuentas cuántos cuentos cuentas, nunca sabrás cuántos cuentos cuentas tú";
 
-            string vari = "Diana ";
+            string vari = "Cuando cuentes cuentos, cuenta cuántos cuentos cuentas; porque si no cuentas cuántos cuentos cuentas, nunca sabrás cuántos cuentos cuentas tú";
 
             Ocurrencia l = prueba.Recurrencia(vari);
             foreach (NodoHuffman ocurrencia in l.Ocurrencias)
@@ -41,6 +41,13 @@ namespace Lab02_2530019_1203819
 
             var z = prueba.EscribirCompresión(d, vari);
             Console.WriteLine(z);
+
+            prueba.AgregarHeap(prueba.HacerArbol(prueba.DescompresionRecurrencias(x)));
+            prueba.AgregarHuffman();
+            prueba.Prefijos();
+            string aver = prueba.descomprimir(z);
+            int hg = 0;
+            Console.WriteLine("" + aver);
         }
 
 
