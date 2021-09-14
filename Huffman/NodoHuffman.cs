@@ -5,12 +5,13 @@ using System.Text;
 namespace Huffman
 {
     public class NodoHuffman
-    { 
+    {
         public NodoHuffman Contenedor { get; set; }
         public NodoHuffman Izquierda { get; set; }
         public NodoHuffman Derecha { get; set; }
         public string Prefijo { get; set; }
-        public string Key { get; set; }
+        public string huffnodo { get; set; }
+        public byte Key { get; set; }
         public int Count { get; set; }
         public double Probabilidad { get; set; }
         public static int Compare_prob(NodoHuffman x, NodoHuffman y)
