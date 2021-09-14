@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using ArbolDePrioridad;
-using System.IO;
+using  System.IO;
 
 namespace Huffman
 {
@@ -37,7 +37,7 @@ namespace Huffman
                     }
                 }
             }
-
+           
             archivoo.Close();
             List<NodoHuffman> l = new List<NodoHuffman>();
             maximo = 0;
@@ -68,14 +68,14 @@ namespace Huffman
             {
                 f++;
             }
-            byte[] comprimido = EscribirTablaAscii(texto, f);
+            byte[] comprimido = EscribirTablaAscii(texto,f);
             prueba = texto;
             Dictionary<byte, string> prefijos = new Dictionary<byte, string>();
-            foreach (NodoHuffman y in letras.Ocurrencias)
+            foreach(NodoHuffman y in letras.Ocurrencias)
             {
                 prefijos.Add(y.Key, y.Prefijo);
             }
-
+            
             FileStream archivoC = new FileStream(Ruta2, FileMode.OpenOrCreate);
             archivoC.Write(comprimido);
             FileStream archivoo2 = new FileStream(Ruta, FileMode.Open);
@@ -86,11 +86,10 @@ namespace Huffman
             while (archivoo2.Position < archivoo2.Length)
             {
                 var buffer = leer2.ReadBytes(100);
-                if (archivoo2.Position >= archivoo2.Length)
-                {
+                if (archivoo2.Position >= archivoo2.Length){
                     ultimoparte = true;
                 }
-                byte[] comprimido2 = EscribirCompresión(prefijos, buffer, ultimoparte);
+                byte[] comprimido2 = EscribirCompresión(prefijos, buffer,ultimoparte);
                 archivoC.Write(comprimido2);
             }
             archivoC.Flush();
@@ -99,7 +98,7 @@ namespace Huffman
         }
         public void AgregarHeap(Ocurrencia letras)
         {
-            Heap = new ArbolDePrioridad<NodoHuffman>(NodoHuffman.Compare_prob);
+            Heap= new ArbolDePrioridad<NodoHuffman>(NodoHuffman.Compare_prob);
             foreach (NodoHuffman o in letras.Ocurrencias)
             {
                 Heap.add(o);
@@ -141,7 +140,7 @@ namespace Huffman
         {
             if (actual.Izquierda == null && actual.Derecha == null)
             {
-                foreach (NodoHuffman y in letras.Ocurrencias)
+                foreach(NodoHuffman y in letras.Ocurrencias)
                 {
                     if (y.Key == actual.Key)
                     {
@@ -172,15 +171,15 @@ namespace Huffman
                 }
             }
         }
-
-        public byte[] EscribirTablaAscii(Dictionary<byte, int> Diccionario, int f)
+       
+        public byte[] EscribirTablaAscii(Dictionary<byte, int> Diccionario,int f)
         {
             int numero = f;
             int contadorbytes = 0;
             while (numero > 0)
             {
                 contadorbytes++;
-                numero -= 255;
+                numero-= 255;
             }
             int canti = f;
             byte[] Frecuencia1 = new byte[contadorbytes];
@@ -207,12 +206,12 @@ namespace Huffman
                 Texto1[h] = Frecuencia1[h];
                 h++;
             }
-            char Texto2 = '\t';
+            char Texto2= '\t';
             Texto1[h] = (byte)Texto2;
             h++;
             foreach (var item in letras.Ocurrencias)
             {
-                Texto1[h] = item.Key;
+                Texto1[h]= item.Key;
                 int cantid = item.Count;
                 byte[] Frecuencia = new byte[f];
                 int posi = 0;
@@ -230,7 +229,7 @@ namespace Huffman
                     }
                     posi++;
                 }
-
+                
                 h++;
                 int i = 0;
                 foreach (var x in Frecuencia)
@@ -245,13 +244,13 @@ namespace Huffman
             Texto1[h] = (byte)Texto2;
             return Texto1;
         }
-        public byte[] EscribirCompresión(Dictionary<byte, string> Diccionario, byte[] texto, bool ultimoparte)
+        public byte[] EscribirCompresión(Dictionary<byte, string> Diccionario, byte[] texto,bool ultimoparte)
         {
-            byte[] Compresion = new byte[texto.Length * 2];
+            byte[] Compresion= new byte[texto.Length*2];
             string Binario = "";
-            foreach (var c in texto)
+            foreach(var c in texto)
             {
-                Binario += Diccionario[c];
+                Binario += Diccionario[c]; 
             }
             tamaño += Binario.Length;
             if (ultimoparte == true)
@@ -261,12 +260,12 @@ namespace Huffman
                     tamaño++;
                     cuantoceros++;
                 }
-                for (int ceros = 0; ceros < cuantoceros; ceros++)
+                for (int ceros=0; ceros<cuantoceros;ceros++)
                 {
                     Binario += "0";
                 }
             }
-
+            
             int conta = 0;
             foreach (var item in Binario)
             {
@@ -286,11 +285,11 @@ namespace Huffman
             }
             return Compresion2;
         }
-        public void DescompresionRecurrencias(string Ruta, string Ruta2)
+        public void DescompresionRecurrencias(string Ruta,string Ruta2)
         {
             FileStream archivoC = new FileStream(Ruta, FileMode.Open);
             using var leer = new BinaryReader(archivoC);
-            Dictionary<byte, int> recurrencias = new Dictionary<byte, int>();
+            Dictionary<byte,int> recurrencias = new Dictionary<byte, int>();
 
             int total = 0;
             string texto = "";
@@ -314,20 +313,20 @@ namespace Huffman
                 var buffer = leer.ReadBytes(100);
                 foreach (var k in buffer)
                 {
-                    if (k == (byte)Texto3)
+                    if (k== (byte)Texto3)
                     {
                         verificar++;
                     }
-                    else if (verificar < 2)
+                    else if(verificar<2)
                     {
                         verificar = 0;
                     }
 
-                    if (k != (byte)Texto3 && comprobar1 == false)
+                    if (k != (byte)Texto3 && comprobar1==false)
                     {
                         cant += k;
                     }
-                    else if (verificar < 2 && comprobar1 == true)
+                    else if (verificar<2 && comprobar1==true)
                     {
                         if (temp == 0)
                         {
@@ -415,7 +414,7 @@ namespace Huffman
                             archivoD.Write(archivo);
                         }
                     }
-
+                    
                 }
             }
             archivoD.Flush();
@@ -446,7 +445,7 @@ namespace Huffman
         {
             foreach (var y in letras.Ocurrencias)
             {
-                if (y.Prefijo == prefijo)
+                if (y.Prefijo== prefijo)
                 {
                     return y.Key;
                 }
