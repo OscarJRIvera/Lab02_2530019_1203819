@@ -13,6 +13,6 @@ namespace Api.Models
         public string RutaComprimido { get; set; }
         public double RazonDeCompresion { get; set; }
         public double FactorDeCompresion { get; set; }
-        public double PorcentajeDeReduccion { get; set; }
+        public string PorcentajeDeReduccion { get; set; }
     }
 }
