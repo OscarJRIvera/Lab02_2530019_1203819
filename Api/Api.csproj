@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Huffman\Huffman.csproj" />
+    <ProjectReference Include="..\LZW\LZW.csproj" />
   </ItemGroup>
 
 
