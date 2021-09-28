@@ -38,8 +38,8 @@ namespace Api.Controllers
             }
 
         }
-        [HttpPost("decompress")]
-        public IActionResult Descomprimir([FromForm] IFormFile file)
+        [HttpPost("{tipodedescomp}/decompress")]
+        public IActionResult Descomprimir([FromForm] IFormFile file, string tipodedescomp)
         {
             try
             {
@@ -59,18 +59,34 @@ namespace Api.Controllers
                 archivoC.Close();
                 if (filename == "huff")
                 {
-                    F.Huff.DescompresionRecurrencias(Ruta, Ruta2);
-                    FileStream ArchivoD = new FileStream(Ruta2, FileMode.OpenOrCreate);
-                    FileStreamResult ArchivoD2 = new FileStreamResult(ArchivoD, "text/lzw");
-                    return ArchivoD2;
+                    if (filename == tipodedescomp)
+                    {
+                        F.Huff.DescompresionRecurrencias(Ruta, Ruta2);
+                        FileStream ArchivoD = new FileStream(Ruta2, FileMode.OpenOrCreate);
+                        FileStreamResult ArchivoD2 = new FileStreamResult(ArchivoD, "text/lzw");
+                        return ArchivoD2;
+                    }
+                    else
+                    {
+                        string json = "El archivo no es de tipo " + tipodedescomp;
+                        return BadRequest(json);
+                    }
+
                 }
                 else if (filename.Substring(1, 3) == "lzw")
                 {
-
-                    F.lzw.Descomprimir(Ruta, Ruta2);
-                    FileStream ArchivoD = new FileStream(Ruta2, FileMode.OpenOrCreate);
-                    FileStreamResult ArchivoD2 = new FileStreamResult(ArchivoD, "text/huff");
-                    return ArchivoD2;
+                    if (filename.Substring(1, 3) == tipodedescomp)
+                    {
+                        F.lzw.Descomprimir(Ruta, Ruta2);
+                        FileStream ArchivoD = new FileStream(Ruta2, FileMode.OpenOrCreate);
+                        FileStreamResult ArchivoD2 = new FileStreamResult(ArchivoD, "text/huff");
+                        return ArchivoD2;
+                    }
+                    else
+                    {
+                        string json = "El archivo no es de tipo " +  tipodedescomp;
+                        return BadRequest(json);
+                    }
                 }
                 else
                 {
