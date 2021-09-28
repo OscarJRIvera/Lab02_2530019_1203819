@@ -10,12 +10,25 @@ namespace LZW
         Dictionary<int, string> diccionariolzw = new Dictionary<int, string>();
         Dictionary<string, int> Dic2 = new Dictionary<string, int>();
         Dictionary<string, int> Dic3 = new Dictionary<string, int>();
+        LZWInfo descinfo = new LZWInfo();
         bool repitir = false;
         string Cadena = "";
         string tempbina = "";
+        int maximobits = 0;
+        int maxbit = 0;
+        int contaletra = 0;
         public void Comprimir(String Ruta, String Ruta2)
         {
-
+            contaletra = 0;
+            maxbit = 0;
+            maximobits = 0;
+            tempbina = "";
+            Cadena = "";
+            repitir = false;
+            descinfo = new LZWInfo();
+            diccionariolzw = new Dictionary<int, string>();
+            Dic2 = new Dictionary<string, int>();
+            Dic3 = new Dictionary<string, int>();
             FileStream archivoc = new FileStream(Ruta2, FileMode.OpenOrCreate);
             FileStream archivoo = new FileStream(Ruta, FileMode.Open);
             using var leer = new BinaryReader(archivoo);
@@ -29,52 +42,30 @@ namespace LZW
             {
                 Dic3.Add(f.Value, f.Key);
             }
-            byte[] Escribirletras = new byte[diccionariolzw.Count + 1];
-            Escribirletras[0] = Convert.ToByte(diccionariolzw.Count);
-            int contad = 0;
+            byte[] Escribirletras = new byte[diccionariolzw.Count + 2];
+            Escribirletras[1] = Convert.ToByte(diccionariolzw.Count);
+            int contad = 2;
             foreach (var k in diccionariolzw)
             {
-                contad++;
                 Escribirletras[contad] = Convert.ToByte(Convert.ToChar(k.Value));
+                contad++;
             }
             contad = 0;
             int llave = 0;
             string numcomp = "";
             archivoo.Position = 0;
             int conta = 0;
-            int conta2 = 0;
-            int conta3 = 0;
             bool ultimo = false;
-            string Binario = "";
-            int maximobits = 0;
             Cadenas(archivoo, leer);
             archivoo.Position = 0;
             maximobits = Maximobits(0, 0);
-            byte[] escribir2 = Maximobitsescrbiir(maximobits);
-            byte[] escrbiirfinal = new byte[escribir2.Length + Escribirletras.Length + 2];
-            foreach (var k in escribir2)
-            {
-                escrbiirfinal[contad] = k;
-                contad++;
-            }
-            escrbiirfinal[contad] = Convert.ToByte('\t');
-            contad++;
-            escrbiirfinal[contad] = Convert.ToByte('\n');
-            contad++;
-            foreach (var k in Escribirletras)
-            {
-                escrbiirfinal[contad] = k;
-                contad++;
-            }
-            archivoc.Write(escrbiirfinal);
+            Escribirletras[0] = Convert.ToByte(maximobits);
+            archivoc.Write(Escribirletras);
             archivoc.Flush();
-
             while (archivoo.Position < archivoo.Length)
             {
-                Binario = "";
-                conta3 = 0;
-                conta2 = 0;
-                var buffer = leer.ReadBytes(100);
+
+                var buffer = leer.ReadBytes(50);
                 foreach (var y in buffer)
                 {
                     conta++;
@@ -87,66 +78,39 @@ namespace LZW
                     {
                         Dic3.Add(Cadena, Dic3.Count + 1);
                         Cadena = Cadena.Substring(Cadena.Length - 1);
-                        numcomp = numcomp + llave + ",";
-                        conta2++;
+                        numcomp = Convert.ToString(llave);
                         llave = Dic3[Cadena];
 
                     }
+                    comprimirbits(archivoc, leer, numcomp, ultimo);
+                    numcomp = "";
                     if (conta == archivoo.Length)
                     {
-                        numcomp = numcomp + llave + ",";
-                        conta2++;
+                        numcomp = Convert.ToString(llave);
                         ultimo = true;
+                        comprimirbits(archivoc, leer, numcomp, ultimo);
                     }
                 }
-                while (numcomp.Length != 0)
-                {
-                    int pos = numcomp.IndexOf(',');
-                    int temp = Convert.ToInt32(numcomp.Substring(0, pos));
-                    numcomp = numcomp.Substring(pos + 1, numcomp.Length - pos - 1);
-                    string esc2 = "";
-                    while (temp != 0)
-                    {
-                        if (temp % 2 != 0)
-                        {
-                            esc2 = "1" + esc2;
-                        }
-                        else
-                        {
-                            esc2 = "0" + esc2;
-                        }
-                        temp = temp / 2;
-                    }
-                    while (esc2.Length < maximobits)
-                    {
-                        esc2 = "0" + esc2;
-                    }
-                    Binario += esc2;
-                    esc2 = "";
-                }
-                if (ultimo == true)
-                {
-                    while ((Binario.Length + tempbina.Length) % 8 != 0)
-                    {
-                        Binario += "0";
-                    }
-                }
-                byte[] escribir = new byte[(Binario.Length + tempbina.Length) / 8];
-                foreach (var item in Binario)
-                {
-                    tempbina += item;
-                    if (tempbina.Length == 8)
-                    {
-                        byte b = Convert.ToByte(tempbina, 2);
-                        escribir[conta3] = b;
-                        tempbina = "";
-                        conta3++;
-                    }
-                }
-                archivoc.Write(escribir);
-                archivoc.Flush();
+
             }
             archivoc.Close();
+            archivoo.Close();
+        }
+        public void Descomprimir(String Ruta, String Ruta2)
+        {
+            FileStream archivoC = new FileStream(Ruta, FileMode.Open);
+            FileStream archivoD = new FileStream(Ruta2, FileMode.OpenOrCreate);
+            using var leer = new BinaryReader(archivoC);
+            Dic2 = DescomprimirLetras(archivoC, leer);
+            diccionariolzw = new Dictionary<int, string>();
+            foreach (var f in Dic2)
+            {
+                diccionariolzw.Add(f.Value, f.Key);
+            }
+            archivoC.Position = 0;
+            DescomprimirTexto(archivoC, leer, archivoD);
+            archivoC.Close();
+            archivoD.Close();
         }
         public void Ordenar()
         {
@@ -166,42 +130,89 @@ namespace LZW
         }
         public int Maximobits(double suma, int conta)
         {
-            for (int x = 0; x <= 8; x++)
+            suma += Math.Pow(2, conta);
+            conta++;
+            if (suma >= Dic2.Count)
             {
-                suma += Math.Pow(2, x);
-                conta++;
-                if (suma >= Dic2.Count)
-                {
-                    return conta;
-                }
+                return conta;
             }
             return Maximobits(suma, conta);
         }
-        public byte[] Maximobitsescrbiir(int Conta)
+        public void comprimirbits(FileStream archivoC, BinaryReader leer, string numcomp, bool ultimo)
         {
-            double f = Convert.ToDouble(Conta) / 255;
-            int f1 = Convert.ToInt32(Math.Truncate(f));
-            if (f % 1 != 0)
+            int conta3 = 0;
+            int cuantosbytes0 = 0;
+            string Binario = "";
+            if (numcomp != "")
             {
-                f1++;
-            }
-            byte[] escribir = new byte[f1];
-            int posi1 = 0;
-            while (Conta != 0)
-            {
-                if (Conta > 255)
+                int temp = Convert.ToInt32(numcomp);
+                string esc2 = "";
+                while (temp != 0)
                 {
-                    escribir[posi1] = 255;
-                    Conta -= 255;
+                    if (temp % 2 != 0)
+                    {
+                        esc2 = "1" + esc2;
+                    }
+                    else
+                    {
+                        esc2 = "0" + esc2;
+                    }
+                    temp = temp / 2;
                 }
-                else
+                cuantosbytes0 = (maximobits - esc2.Length) / 8;
+                while (esc2.Length < maximobits - (cuantosbytes0 * 8))
                 {
-                    escribir[posi1] = (byte)Conta;
-                    Conta = 0;
+                    esc2 = "0" + esc2;
                 }
-                posi1++;
+                Binario += esc2;
+                if (ultimo == true)
+                {
+                    while ((Binario.Length + tempbina.Length) % 8 != 0)
+                    {
+                        Binario += "0";
+                    }
+                }
+                double size = (Convert.ToDouble(Binario.Length) + Convert.ToDouble(tempbina.Length)) / 8;
+                int size2 = Convert.ToInt32(Math.Truncate(size));
+                byte[] escribir = new byte[size2 + cuantosbytes0];
+                while (cuantosbytes0 != 0)
+                {
+                    cuantosbytes0--;
+                    for (int o = 0; o < 8; o++)
+                    {
+                        tempbina += '0';
+                        if (tempbina.Length == 8)
+                        {
+                            byte b = Convert.ToByte(tempbina, 2);
+                            escribir[conta3] = b;
+                            tempbina = "";
+                            conta3++;
+                        }
+                    }
+                    if (cuantosbytes0 > 1)
+                    {
+                        conta3 += cuantosbytes0;
+                        cuantosbytes0 = 0;
+                    }
+                }
+                foreach (var item in Binario)
+                {
+                    tempbina += item;
+                    if (tempbina.Length == 8)
+                    {
+                        byte b = Convert.ToByte(tempbina, 2);
+                        escribir[conta3] = b;
+                        tempbina = "";
+                        conta3++;
+                    }
+                }
+                if (escribir.Length != 0)
+                {
+                    archivoC.Write(escribir);
+                    archivoC.Flush();
+                }
+
             }
-            return escribir;
         }
         public void Cadenas(FileStream archivoo, BinaryReader leer)
         {
@@ -244,5 +255,123 @@ namespace LZW
                 }
             }
         }
+        public Dictionary<string, int> DescomprimirLetras(FileStream archivoC, BinaryReader leer)
+        {
+            int contad = 0;
+            int cuantasletras = 0;
+            int letrascant = 1;
+            Dictionary<string, int> letras = new Dictionary<string, int>();
+            while (archivoC.Position < archivoC.Length)
+            {
+                var buffer = leer.ReadBytes(50);
+                foreach (var k in buffer)
+                {
+                    if (contad == 0)
+                    {
+                        maxbit = Convert.ToInt32(k);
+                    }
+                    else if (contad == 1)
+                    {
+                        cuantasletras = Convert.ToInt32(k);
+                    }
+                    else
+                    {
+                        if (cuantasletras != 0)
+                        {
+                            letras.Add(Convert.ToString(Convert.ToChar(k)), letrascant);
+                            letrascant++;
+                            cuantasletras--;
+                        }
+                        else
+                        {
+                            contaletra = letras.Count + 2;
+                            return letras;
+                        }
+                    }
+                    contad++;
+                }
+            }
+            return null;
+        }
+        public void DescomprimirTexto(FileStream archivoC, BinaryReader leer, FileStream archivoD)
+        {
+            descinfo.actual = ""; descinfo.nuevo = ""; descinfo.previo = "";
+            tempbina = "";
+            int contador = 0;
+            string binario = "";
+            int suma = 0;
+            int exponente = 0;
+            while (archivoC.Position < archivoC.Length)
+            {
+                var buffer = leer.ReadBytes(50);
+                foreach (var k in buffer)
+                {
+                    if (contador >= contaletra)
+                    {
+                        binario += Convert.ToString(k, 2);
+                        while (binario.Length % 8 != 0)
+                        {
+                            binario = "0" + binario;
+                        }
+                        foreach (var o in binario)
+                        {
+                            tempbina += o;
+                            if (tempbina.Length == maxbit)
+                            {
+                                exponente = maxbit - 1;
+                                suma = 0;
+                                foreach (var F in tempbina)
+                                {
+                                    if (F == '1')
+                                    {
+                                        suma += Convert.ToInt32(Math.Pow(2, exponente));
+                                    }
+                                    exponente--;
+                                }
+                                if (suma == 0)
+                                {
+                                    return;
+                                }
+                                tempbina = "";
+                                string temp = "";
+                                if (suma == diccionariolzw.Count + 1)
+                                {
+                                    temp = descinfo.previo + descinfo.previo;
+                                }
+                                else
+                                {
+                                    temp = diccionariolzw[suma];
+                                }
+                                byte[] escribir = new byte[temp.Length];
+                                int contadorescribir = 0;
+                                foreach (var ch in temp)
+                                {
+                                    escribir[contadorescribir] = Convert.ToByte(ch);
+                                    contadorescribir++;
+                                }
+                                if (descinfo.previo == "")
+                                {
+                                    descinfo.previo = temp;
+                                }
+                                else if (descinfo.actual == "")
+                                {
+                                    descinfo.actual = temp;
+                                    descinfo.nuevo = descinfo.previo + descinfo.actual.Substring(0, 1);
+                                    diccionariolzw.Add(diccionariolzw.Count + 1, descinfo.nuevo);
+                                    descinfo.previo = descinfo.actual;
+                                    descinfo.actual = "";
+                                    descinfo.nuevo = "";
+                                }
+                                archivoD.Write(escribir);
+                                archivoD.Flush();
+                            }
+                        }
+                        binario = "";
+                    }
+                    contador++;
+                }
+            }
+        }
+
     }
 }

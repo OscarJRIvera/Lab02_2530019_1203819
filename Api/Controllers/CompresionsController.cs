@@ -39,20 +39,45 @@ namespace Api.Controllers
 
         }
         [HttpPost("decompress")]
-        public IActionResult Descomprimir([FromForm] IFormFile File)
+        public IActionResult Descomprimir([FromForm] IFormFile file)
         {
             try
             {
-                string Ruta = Path.GetFullPath("ArchivosC\\" + File.FileName);
-                string nombre = F.Nombres[File.FileName];
+                string filename;
+                if (file == null)
+                    return BadRequest();
+                else
+                {
+                    filename = file.FileName.Substring(file.FileName.Length - 4, 4);
+
+                }
+                string Ruta = Path.GetFullPath("ArchivosC\\" + file.FileName);
+                string nombre = F.Nombres[file.FileName];
                 string Ruta2 = Path.GetFullPath("ArchivosD\\" + nombre);
                 FileStream archivoC = new FileStream(Ruta, FileMode.OpenOrCreate);
-                File.CopyTo(archivoC);
+                file.CopyTo(archivoC);
                 archivoC.Close();
-                F.Huff.DescompresionRecurrencias(Ruta, Ruta2);
-                FileStream ArchivoD = new FileStream(Ruta2, FileMode.OpenOrCreate);
-                FileStreamResult ArchivoD2 = new FileStreamResult(ArchivoD, "text/huff");
-                return ArchivoD2;
+                if (filename == "huff")
+                {
+                    F.Huff.DescompresionRecurrencias(Ruta, Ruta2);
+                    FileStream ArchivoD = new FileStream(Ruta2, FileMode.OpenOrCreate);
+                    FileStreamResult ArchivoD2 = new FileStreamResult(ArchivoD, "text/lzw");
+                    return ArchivoD2;
+                }
+                else if (filename.Substring(1, 3) == "lzw")
+                {
+
+                    F.lzw.Descomprimir(Ruta, Ruta2);
+                    FileStream ArchivoD = new FileStream(Ruta2, FileMode.OpenOrCreate);
+                    FileStreamResult ArchivoD2 = new FileStreamResult(ArchivoD, "text/huff");
+                    return ArchivoD2;
+                }
+                else
+                {
+                    string json = "solo existe descompression para archivos 'huff' o 'lzw'";
+                    return BadRequest(json);
+                }
+
             }
             catch (Exception error)
             {
@@ -60,41 +85,73 @@ namespace Api.Controllers
             }
 
         }
-        [HttpPost("compress/{name}")]
-        public IActionResult Comprimir([FromForm] IFormFile File, [FromRoute] string name)
+        [HttpPost("{tipodecomp}/compress/{name}")]
+        public IActionResult Comprimir([FromForm] IFormFile file, [FromRoute] string name, string tipodecomp)
         {
             try
             {
-                string Ruta = Path.GetFullPath("Archivoso\\" + name + File.FileName);
-                string Ruta2 = Path.GetFullPath("ArchivosC\\" + name + ".huff");
+                if (file == null)
+                    return BadRequest();
+                string Ruta = Path.GetFullPath("Archivoso\\" + name + file.FileName);
                 FileStream archivoo = new FileStream(Ruta, FileMode.OpenOrCreate);
-                File.CopyTo(archivoo);
+                file.CopyTo(archivoo);
                 archivoo.Close();
-                F.Huff.Recurrencia(Ruta, Ruta2);
-                FileStream archivoC = new FileStream(Ruta2, FileMode.OpenOrCreate);
-                FileStreamResult ArchivoC2 = new FileStreamResult(archivoC, "text/huff");
-                Compresion temp = new Compresion();
-                temp.RutaComprimido = Ruta2;
-                temp.NombreOriginal = name + File.FileName;
-                temp.NombreComprimido = name + ".huff";
-                F.Nombres.Add(temp.NombreComprimido, temp.NombreOriginal);
-                FileStream archivoo2 = new FileStream(Ruta, FileMode.Open);
-                double razon = (Convert.ToDouble(archivoC.Length) / Convert.ToDouble(archivoo2.Length));
-                double factor = (Convert.ToDouble(archivoo2.Length) / Convert.ToDouble(archivoC.Length));
-                double porc = (1 - razon) * 100;
-                string porcentaje = "" + porc + "%";
-                temp.RazonDeCompresion = razon;
-                temp.FactorDeCompresion = factor;
-                temp.PorcentajeDeReduccion = porcentaje;
-                F.Historial.Add(temp);
+                if (tipodecomp == "huff")
+                {
+                    string Ruta2 = Path.GetFullPath("ArchivosC\\" + name + ".huff");
+                    F.Huff.Recurrencia(Ruta, Ruta2);
+                    FileStream archivoC = new FileStream(Ruta2, FileMode.OpenOrCreate);
+                    FileStreamResult ArchivoC2 = new FileStreamResult(archivoC, "text/huff");
+                    Compresion temp = new Compresion();
+                    temp.RutaComprimido = Ruta2;
+                    temp.NombreOriginal = name + file.FileName;
+                    temp.NombreComprimido = name + ".huff";
+                    F.Nombres.Add(temp.NombreComprimido, temp.NombreOriginal);
+                    FileStream archivoo2 = new FileStream(Ruta, FileMode.Open);
+                    double razon = (Convert.ToDouble(archivoC.Length) / Convert.ToDouble(archivoo2.Length));
+                    double factor = (Convert.ToDouble(archivoo2.Length) / Convert.ToDouble(archivoC.Length));
+                    double porc = (1 - razon) * 100;
+                    string porcentaje = "" + porc + "%";
+                    temp.RazonDeCompresion = razon;
+                    temp.FactorDeCompresion = factor;
+                    temp.PorcentajeDeReduccion = porcentaje;
+                    F.Historial.Add(temp);
 
-                return ArchivoC2;
+                    return ArchivoC2;
+                }
+                else if (tipodecomp == "lzw")
+                {
+                    string Ruta2 = Path.GetFullPath("ArchivosC\\" + name + ".lzw");
+                    F.lzw.Comprimir(Ruta, Ruta2);
+                    FileStream archivoC = new FileStream(Ruta2, FileMode.OpenOrCreate);
+                    FileStreamResult ArchivoC2 = new FileStreamResult(archivoC, "text/lzw");
+                    Compresion temp = new Compresion();
+                    temp.RutaComprimido = Ruta2;
+                    temp.NombreOriginal = name + file.FileName;
+                    temp.NombreComprimido = name + ".lzw";
+                    F.Nombres.Add(temp.NombreComprimido, temp.NombreOriginal);
+                    FileStream archivoo2 = new FileStream(Ruta, FileMode.Open);
+                    double razon = (Convert.ToDouble(archivoC.Length) / Convert.ToDouble(archivoo2.Length));
+                    double factor = (Convert.ToDouble(archivoo2.Length) / Convert.ToDouble(archivoC.Length));
+                    double porc = (1 - razon) * 100;
+                    string porcentaje = "" + porc + "%";
+                    temp.RazonDeCompresion = razon;
+                    temp.FactorDeCompresion = factor;
+                    temp.PorcentajeDeReduccion = porcentaje;
+                    F.Historial.Add(temp);
+                    return ArchivoC2;
+                }
+                else
+                {
+                    string json = "solo existe compression 'huff' o 'lzw'";
+                    return BadRequest(json);
+                }
+
             }
             catch (Exception error)
             {
                 return BadRequest(error.Message);
             }
-
         }
     }
 }

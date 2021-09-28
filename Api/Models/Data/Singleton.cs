@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Api.Models;
 using Huffman;
+using LZW;
 
 namespace Api.Models.Data
 {
@@ -14,12 +15,14 @@ namespace Api.Models.Data
         public Huffman.Huffman Huff;
         public Dictionary<string, string> Nombres;
         public Dictionary<string, Compresion> historial;
+        public LZW.LZW lzw;
         private Singleton()
         {
             Huff = new Huffman.Huffman();
             Historial = new List<Compresion>();
             Nombres = new Dictionary<string, string>();
             historial = new Dictionary<string, Compresion>();
+            lzw = new LZW.LZW();
         }
         public static Singleton Instance
         {
